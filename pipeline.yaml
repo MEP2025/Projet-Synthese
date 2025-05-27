@@ -1,0 +1,50 @@
+# pipeline.yaml - Pipeline CI/CD pour le projet PROJET_ML (classification de fleurs)
+version: 1.0  # Version du schéma
+
+stages:
+  # ÉTAPE 1 : Récupération du code source depuis GitHub
+  - name: Source
+    actions:
+      - name: Pull_Source_Code
+        action_type_id:
+          category: Source
+          owner: AWS
+          provider: GitHub 
+        configuration:
+          Repo: "https://github.com/MEP2025/Projet-Synthese/tree/projet_ml_sihem" 
+          Branch: "main" 
+          PollForSourceChanges: true  
+
+  # ÉTAPE 2 : Construction et test (utilise le buildspec.yml)
+  - name: Build
+    actions:
+      - name: Build_Model
+        action_type_id:
+          category: Build
+          owner: AWS
+          provider: CodeBuild
+        configuration:
+          ProjectName: "projet-ml-model"  
+          EnvironmentVariables: |
+            [
+              {"name": "MODEL_DIR", "value": "/opt/ml/model"},
+              {"name": "IMAGE_NAME", "value": "projet-ml-model"}
+            ]
+
+  # ÉTAPE 3 : Déploiement sur SageMaker
+  - name: Deploy
+    actions:
+      - name: Deploy_Model
+        action_type_id:
+          category: Deploy
+          owner: AWS
+          provider: SageMaker
+        configuration:
+          ModelName: "projet-ml-model"  
+          InitialInstanceCount: 1  # Nombre d'instances
+          InstanceType: "ml.t2.medium"  # Type d'instance (ajustable)
+
+# Métadonnées optionnelles
+metadata:
+  pipeline_type: "MLOps"
+  description: "Pipeline pour le modèle de classification de fleurs (PROJET_ML)"

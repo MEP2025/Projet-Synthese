@@ -1,0 +1,27 @@
+version: 0.2  # Version de la syntaxe buildspec
+
+phases:
+  install:
+    commands:
+      - echo "Installation des dépendances..."
+      - pip install -r requirement.txt  # Installe les dépendances Python
+
+  pre_build:
+    commands:
+      - echo "Étape pré-build : validation des fichiers..."
+      - ls -al  # Liste les fichiers 
+
+  build:
+    commands:
+      - echo "Build de l'image Docker..."
+      - docker build -t projet-ml  .  # Construit l'image depuis le Dockerfile
+
+  post_build:
+    commands:
+      - echo "Étape post-build : tests et préparation du déploiement..."
+      - docker run flower-classifier python inference.py --test  # Simulation d'un test (ajustez si nécessaire)
+
+artifacts:
+  files:
+    - '**/*'  
+  base-directory: 'app'
